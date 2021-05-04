@@ -19,7 +19,8 @@ data at 5 minute intervals. The variables included in this data set are:
 We load the contents of the CSV file with 17,568 observations of steps, date and
 interval into a data frame.
 
-```{r echo=TRUE}
+
+```r
 data_activity <- read.csv("./activity.csv", header=TRUE)
 ```
 
@@ -28,58 +29,91 @@ data_activity <- read.csv("./activity.csv", header=TRUE)
 We now calculate the total number of steps taken per day with the help of the 
 plyr package and the ddply function. Missing values are ignored. 
 
-```{r echo=TRUE}
+
+```r
 library(plyr)
+```
+
+```
+## Warning: package 'plyr' was built under R version 4.0.5
+```
+
+```r
 total_daily_steps <- ddply(data_activity, .(date), summarize, count=sum(steps))
 ```
 
 Using the data set with the daily totals we make a histogram of the total number
 of steps taken each day.
 
-```{r echo=TRUE}
+
+```r
 hist(total_daily_steps$count, xlab="Number of steps", main="Histogram of steps taken per day")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
+
 Also, we calculate the mean (10766) and median (10765) of steps taken per day.
 
-```{r echo=TRUE}
+
+```r
 summary(total_daily_steps$count)
+```
+
+```
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+##      41    8841   10765   10766   13294   21194       8
 ```
 
 ## What is the average daily activity pattern?
 
 We now average the number of steps taken each time interval across all dates. 
 
-```{r echo=TRUE}
+
+```r
 library(plyr)
 minute_interval_steps <- ddply(data_activity, .(interval), summarize, average=mean(steps, na.rm = TRUE))
 ```
 
 The time series plot of the average of steps across all dates is the following:
 
-```{r echo=TRUE}
+
+```r
 plot(minute_interval_steps$interval, minute_interval_steps$average, type = "l", 
      main="Average of steps per time interval", xlab="Average of steps", ylab="Time interval")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
+
 We see a peak in the morning, which occurs at 8:35 am.
 
-```{r echo=TRUE}
+
+```r
 minute_interval_steps[which.max(minute_interval_steps$average),]
+```
+
+```
+##     interval  average
+## 104      835 206.1698
 ```
 
 ## Imputing missing values
 
 We now calculate the total of missing values in the data set.
 
-```{r echo=TRUE}
+
+```r
 sum(is.na(data_activity$steps))
+```
+
+```
+## [1] 2304
 ```
 
 We propose to fill out every 5 minute interval that is missing with the average 
 of that 5 minute interval across all the other dates.
 
-```{r echo=TRUE}
+
+```r
 # Make a copy of the original data set
 data_activity_fill <- data_activity
 
@@ -95,16 +129,25 @@ for(i in 1:length(data_activity_fill$steps)) {
 
 The histogram of the total number of steps taken each day with this new imputed 
 data set looks like this.
-```{r echo=TRUE}
+
+```r
 imputed_daily_steps <- ddply(data_activity_fill, .(date), summarize, count=sum(steps))
 hist(imputed_daily_steps$count, xlab="Number of steps", 
      main="New histogram of steps taken per day (imputed data)")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-10-1.png)<!-- -->
+
 Compared to the original data set, the mean is the same (10766) but the median is 
 a little lower (10762 now vs 10765 in the previous data set). 
-```{r echo=TRUE}
+
+```r
 summary(imputed_daily_steps$count)
+```
+
+```
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##      41    9819   10762   10766   12811   21194
 ```
 
 The fact that the median has slightly decreased indicates that the missing values 
@@ -118,7 +161,8 @@ and "weekend". This example was generated with a spanish locale and checks if th
 last letter is an "o". In english, the equivalent would be to check if the weekday
 starts with an s ("^[s]").
 
-```{r echo=TRUE}
+
+```r
 data_activity_fill <- mutate(data_activity_fill, daytype = factor(1*(grepl("[o]$", 
         weekdays(as.Date(data_activity_fill$date)))), labels = c("weekday","weekend")))
 ```
@@ -127,7 +171,8 @@ We calculate again the average for each time interval, this time using the two
 levels we generated in the previous step, so there will be two values for 0, 5, 10
 up to 2355. 
 
-```{r echo=TRUE}
+
+```r
 library(plyr)
 minute_interval_steps_fill <- ddply(data_activity_fill, .(interval,daytype), summarize, average=mean(steps))
 ```
@@ -135,7 +180,17 @@ minute_interval_steps_fill <- ddply(data_activity_fill, .(interval,daytype), sum
 Finally, we make a panel plot to compare the average of steps for each time interval 
 between weekdays and weekend days.
 
-```{r echo=TRUE}
+
+```r
 library(ggplot2)
+```
+
+```
+## Warning: package 'ggplot2' was built under R version 4.0.5
+```
+
+```r
 qplot(interval, average, data=minute_interval_steps_fill, facets=daytype~., geom="line")
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-14-1.png)<!-- -->
