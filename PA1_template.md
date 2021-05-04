@@ -48,9 +48,10 @@ of steps taken each day.
 
 ```r
 hist(total_daily_steps$count, xlab="Number of steps", main="Histogram of steps taken per day")
+dev.copy(png, file="./figure/plot1.png")
+dev.off()
 ```
-
-![](PA1_template_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
+![](figure/plot1.png)
 
 Also, we calculate the mean (10766) and median (10765) of steps taken per day.
 
@@ -80,9 +81,10 @@ The time series plot of the average of steps across all dates is the following:
 ```r
 plot(minute_interval_steps$interval, minute_interval_steps$average, type = "l", 
      main="Average of steps per time interval", xlab="Average of steps", ylab="Time interval")
+dev.copy(png, file="./figure/plot2.png")
+dev.off()
 ```
-
-![](PA1_template_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
+![](figure/plot2.png)
 
 We see a peak in the morning, which occurs at 8:35 am.
 
@@ -125,18 +127,21 @@ for(i in 1:length(data_activity_fill$steps)) {
       minute_interval_steps$interval == data_activity_fill$interval[i])])
   }
 }
+
+# Average of steps with the imputed data set
+imputed_daily_steps <- ddply(data_activity_fill, .(date), summarize, count=sum(steps))
 ```
 
 The histogram of the total number of steps taken each day with this new imputed 
 data set looks like this.
 
 ```r
-imputed_daily_steps <- ddply(data_activity_fill, .(date), summarize, count=sum(steps))
 hist(imputed_daily_steps$count, xlab="Number of steps", 
      main="New histogram of steps taken per day (imputed data)")
+dev.copy(png, file="./figure/plot3.png")
+dev.off()
 ```
-
-![](PA1_template_files/figure-html/unnamed-chunk-10-1.png)<!-- -->
+![](figure/plot3.png)
 
 Compared to the original data set, the mean is the same (10766) but the median is 
 a little lower (10762 now vs 10765 in the previous data set). 
@@ -183,14 +188,8 @@ between weekdays and weekend days.
 
 ```r
 library(ggplot2)
-```
-
-```
-## Warning: package 'ggplot2' was built under R version 4.0.5
-```
-
-```r
 qplot(interval, average, data=minute_interval_steps_fill, facets=daytype~., geom="line")
+dev.copy(png, file="./figure/plot4.png")
+dev.off()
 ```
-
-![](PA1_template_files/figure-html/unnamed-chunk-14-1.png)<!-- -->
+![](figure/plot4.png)
